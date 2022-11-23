@@ -1,0 +1,225 @@
+create table Matriz (
+  id_matriz integer,
+  lugar_matriz varchar not null,
+  registrados_matriz varchar not null,
+  interno_matriz varchar not null,
+  constraint PK_id_matriz primary key (id_matriz)
+ );
+
+insert into Matriz(id_matriz,lugar_matriz,registrados_matriz,interno_matriz)
+  values('01','Manta','1','Frank');
+  
+create table Sucursales (
+  id_sucursales integer,
+  lugar_sucursal varchar not null,
+  registrados_sucursal varchar not null,
+  interno_sucursal varchar not null,
+  constraint PK_id_sucursales primary key (id_sucursales)
+ );
+ 
+ insert into Sucursales(id_sucursales,lugar_sucursal,registrados_sucursal,interno_sucursal)
+  values('02','Portoviejo','1','Nicoll');
+  values('03','Bahia','0');
+  
+ create table Inventario(
+  id_inventario integer,
+  producto varchar,
+  stock integer,
+  constraint PK_id_inventario primary key (id_inventario)
+ );
+ 
+ insert into Inventario(id_inventario,producto,stock)
+  values('01','Vendas Adhesivas','25');
+  values('02','Cintas Kinesiologas','30');
+  values('03','Linimento','12');
+  values('04','Magnoterapia','2');
+  
+ create table Secretaria (
+  id_secretaria integer,
+  historico_cliente varchar not null,
+  anio integer,
+  lugar varchar not null,
+  motivo varchar not null,
+  constraint PK_id_secretaria primary key (id_secretaria)
+ );
+ 
+ insert into Secretaria(id_secretaria,historico_cliente,anio,motivo)
+  values('01','Kevin Perez','2019','Rodilla');
+  values('02','Nicoll Lasso','2021','Cadera');
+
+create table Cliente (
+  id_cliente integer,
+  cedula_cliente numeric(10),
+  nombre_cliente varchar not null,
+  apellido_cliente varchar not null,
+  celular_cliente numeric(20),
+  correo_cliente varchar not null,
+  genero_cliente varchar not null,
+  problema_fisico varchar not null,
+  codigo_seguro numeric(20),
+  constraint PK_id_cliente primary key (id_cliente)
+ );
+ 
+ insert into Cliente(id_cliente,cedula_cliente,nombre_cliente,apellido_cliente,celular_cliente,correo_cliente,genero_cliente,problema_fisico,codigo_seguro)
+  values('01','1314089085','Frank','Perez','0996936160','frank@hotmail.com','Masculino','Dolor de Rodilla','025');
+ insert into Cliente(id_cliente,cedula_cliente,nombre_cliente,apellido_cliente,celular_cliente,correo_cliente,genero_cliente,problema_fisico,codigo_seguro)
+  values('02','1398417174','Nicoll','Lasso','0996931245','nicoll@hotmail.com','Femenino','Dolor de Espalda','026');
+ 
+create table Medico (
+  id_medico integer,
+  nombre varchar not null,
+  apellido varchar not null,
+  cedula numeric(10),
+  edad numeric(10),
+  especialidad varchar not null,
+  correo_electronico varchar not null,
+  numero_celular varchar not null,
+  nacionalidad varchar not null,
+  genero varchar not null,
+  constraint PK_id_medico primary key (id_medico)
+ );
+
+insert into Medico(id_medico,nombre,apellido,cedula,edad,especialidad,correo_electronico,numero_celular,nacionalidad,genero)
+  values('01','Ruben','Sobrino','1304721589','42','Traumatologo','drruben@gmail.com','0994156780','Ecuatoriano','Masculino');
+insert into Medico(id_medico,nombre,apellido,cedula,edad,especialidad,correo_electronico,numero_celular,nacionalidad,genero)
+  values('02','Natalia','Fernandez','1312581064','32','Quiropractico','dranatalia@gmail.com','0984510032','Argentina','Femenino'); 
+ 
+ create table Intervenciones (
+  id_intervenciones integer,
+  medico varchar not null,
+  total numeric(30),
+  constraint PK_id_intervenciones primary key (id_intervenciones)
+ );
+ 
+ insert into Intervenciones(id_intervenciones,medico,total)
+  values('01','Dr Ruben Sobrino','4');
+  values('02','Dr Natalia Fernandez','7');
+ 
+ create table Diagnostico (
+  id_diagnostico integer,
+  interno varchar not null,
+  diagnostico_lesion varchar not null,
+  constraint PK_id_diagnostico primary key (id_diagnostico)
+ );
+ 
+ insert into Diagnostico(id_diagnostico,interno,diagnostico_lesion)
+  values('01','Kevin Perez','Ligamento Cruzado Interior');
+  values('02','Nicoll Lasso','Distension de Cadera');
+ 
+  create table Seguro (
+  id_seguro integer,
+  numero_seguro numeric(20),
+  nombre_paciente varchar not null,
+  centro_derivado varchar not null,
+  constraint PK_id_seguro primary key (id_seguro)
+ );
+ 
+  insert into Seguro(id_seguro,numero_seguro,nombre_paciente,centro_derivado)
+  values('01','025','Kevin','Manta');
+  values('02','000','Nicoll','Portoviejo');
+ 
+ --CONSULTA 1
+ --HISTORICO DE CLIENTES REGISTRADOS EN MATRIZ
+select
+    extract (year from secretaria.anio),
+from secretaria,
+    inner join cliente on cliente.nombre_cliente = secretaria.historico_cliente
+    inner join matriz on.lugar_matriz = secretaria.lugar
+    group by
+    extract (year from secretaria.anio),secretaria.historicocliente,
+    cliente.nombre_cliente,matriz.lugar_matriz
+    
+--CONSULTA 2
+--HISTORICO POR LESION
+select
+    extract (year from secretaria.anio),
+from secretaria,
+    inner join cliente on cliente.nombre_cliente = secretaria.historico_cliente
+    inner join diagnostico on.lesion = secretaria.fecha
+    group by
+    extract (year from secretaria.anio),secretaria.fecha,
+    diagnostico.lesion,secretaria.historico_cliente
+
+--CONSULTA 3
+--HISTORICO DE MEDICOS POR ANO
+create or replace view medicos_view (fecha, total)
+select
+    extract (year from registro.fecha) as fecha,
+    sum (centro.medicos_registrados) as total_medicos 
+from registro,
+    inner join centro on medicos.cod_medicos = registro.cod_medicos
+    group by
+    extract (year from registro.fecha)
+    order by extract(year from registro.fecha)
+select * from medicos_view
+
+--CONSULTA 4
+--HISTORICO DE ATENCION POR ANO
+create or replace view atencion_view (fecha_atencion, total_atencion)
+select
+    extract (year from registro.fecha) as fecha,
+    count (secretaria.cod_registro) as total_atencion 
+from registro
+    inner join secretaria on secretaria.cod_registro = registro.cod_registro
+    group by
+    extract (year from registro.fecha)
+    order by extract(year from registro.fecha)
+select * from atencion_view
+
+--CONSULTA TRIGGER
+--UN MEDICO NO PUEDE ATENDER MAS DE 3 PACIENTES
+create or replace view prohibicion()
+returns trigger as $$
+declare
+totalatencion int;
+begin
+select count(*)into totalatencion from intervenciones where id_medico=new.id_medico
+if(totalatencion >= 3)then
+raise exception 'EL MEDICO NO PUEDE ATENDER MAS DE 3 PACIENTES'
+end if;
+return new;
+end;
+$$
+languaje plpgsql
+create trigger IntervencionMedico before insert
+on intervenciones for each row
+execute procedure prohibicion();
+insert into intervenciones values(6,7,8,9,'INTERVENCION MATRIZ')
+
+--CONSULTA CURSOR
+--CREAR UN CURSOR QUE MUESTRE FECHA,DURACION Y SUELDO DE CONTRATO
+Do $$
+declare
+registro Record;
+cur_contra Cursor for select * from Contrato;
+begin
+Open cur_contra;
+fetch cur_contra into registro;
+while (FOUND) loop
+Raise Notice 'Fecha del Contrato: %, Duracion del Contrato: %, Sueldo:%',
+registro.fechacontrato,registro.duracion_contrato,registro.sueldo_contrato;
+fetch cur_contra into registro;
+end loop
+end $$
+language plpgsql;
+
+--CONSULTA STORED PROCEDURE
+--CREAR UN STORED PROCEDURE QUE DEVUELVA EL TOTAL DE IMPLEMENTOS EN MATRIZ
+create or replace function producto_total (lugar_matriz text, id_producto int) return bigint
+as
+$$
+select count(Total.total_producto) from Inventario,Matriz
+where Inventario.total_producto = Matriz.id_producto
+$$
+language plpgsql;
+
+select producto_total('Manta','1')
+
+--CONSULTA REPORTE
+--CREAR UN REPORTE QUE MUESTRE EL TOTAL DE PACIENTES EN LAS SUCURSALES
+select
+sucursales.lugar_sucursal as sucursales,
+count (Secretaria.historico_cliente) as Secretaria
+from Secretaria
+    inner join sucursales on sucursales.id_sucursales=Secretaria.id_sucursales
+    group by sucursales.lugar_sucursal
